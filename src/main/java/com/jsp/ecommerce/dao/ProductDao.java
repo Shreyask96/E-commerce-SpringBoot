@@ -21,5 +21,12 @@ public class ProductDao {
 		return productRepository.findAll();
 	}
 	
+	public Product findById(int id) {
+		return productRepository.findById(id).orElse(null);
+	}
+
+	public void delete(Product product) {
+		productRepository.delete(product);
+	}
 	
 }
