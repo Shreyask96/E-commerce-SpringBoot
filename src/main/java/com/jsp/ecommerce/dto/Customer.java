@@ -4,9 +4,12 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -103,6 +106,16 @@ public class Customer {
 	public String toString() {
 		return "Customer [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", mobile="
 				+ mobile + ", dob=" + dob + ", gender=" + gender + ", otp=" + otp + ", verified=" + verified + "]";
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	ShoppingCart cart;
+	
+	public ShoppingCart getCart() {
+		return cart;
+	}
+	public void setCart(ShoppingCart cart) {
+		this.cart = cart;
 	}
 	
 	

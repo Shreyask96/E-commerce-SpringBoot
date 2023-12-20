@@ -29,4 +29,7 @@ public class ProductDao {
 		productRepository.delete(product);
 	}
 	
+	public List<Product> fetchDisplayProducts() {
+		return productRepository.findByDisplayTrue();
+	}
 }

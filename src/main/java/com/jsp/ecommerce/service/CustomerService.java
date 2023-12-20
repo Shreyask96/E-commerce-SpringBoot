@@ -1,5 +1,6 @@
 package com.jsp.ecommerce.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -8,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 
 import com.jsp.ecommerce.dao.CustomerDao;
+import com.jsp.ecommerce.dao.ProductDao;
 import com.jsp.ecommerce.dto.Customer;
+import com.jsp.ecommerce.dto.Item;
+import com.jsp.ecommerce.dto.Product;
+import com.jsp.ecommerce.dto.ShoppingCart;
 import com.jsp.ecommerce.helper.AES;
 import com.jsp.ecommerce.helper.EmailLogic;
 
@@ -21,6 +26,9 @@ public class CustomerService {
 
 	@Autowired
 	EmailLogic emailLogic;
+	
+	@Autowired
+	ProductDao productDao;
 
 	public String signup(Customer customer, ModelMap map) {
 		// to check Email and Mobile is Unique
@@ -109,5 +117,63 @@ public class CustomerService {
 			}
 		}
 	}
+	
+	
+	public String fetchProducts(ModelMap map) {
+		List<Product> products = productDao.fetchDisplayProducts();
+		if (products.isEmpty()) {
+			map.put("fail", "No Products Present");
+			return "CustomerHome";
+		} else {
+			map.put("products", products);
+			return "CustomerViewProduct";
+		}
 
+	}
+	
+	public String addToCart(Customer customer, int id, ModelMap map) {
+		Product product = productDao.findById(id);
+
+		ShoppingCart cart = customer.getCart();
+		if (cart == null)
+			cart = new ShoppingCart();
+
+		List<Item> items = cart.getItems();
+		if (items == null)
+			items = new ArrayList<Item>();
+
+		if (product.getStock() > 0) {
+			boolean flag = true;
+			//if item Already Exists in cart
+			for (Item item : items) {
+				if (item.getName().equals(product.getName())) {
+					flag = false;
+					item.setQuantity(item.getQuantity() + 1);
+					item.setPrice(item.getPrice() + product.getPrice());
+				}
+			}
+			if (flag) {
+				//If item is New in cart
+				Item item = new Item();
+				item.setCategory(product.getCategory());
+				item.setName(product.getName());
+				item.setPicture(product.getPicture());
+				item.setPrice(product.getPrice());
+				item.setQuantity(1);
+				items.add(item);
+			}
+			cart.setItems(items);
+			customer.setCart(cart);
+			customerDao.save(customer);
+			//updating stock
+			product.setStock(product.getStock()-1);
+			productDao.save(product);
+			
+			map.put("pass", "Product Added to Cart");
+			return fetchProducts(map);
+		} else {
+			map.put("fail", "Out of stock");
+			return fetchProducts(map);
+		}
+	}
 }
