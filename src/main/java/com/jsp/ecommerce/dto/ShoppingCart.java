@@ -15,6 +15,7 @@ public class ShoppingCart {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
+	double totalAmount;
 
 	public int getId() {
 		return id;
@@ -33,9 +34,17 @@ public class ShoppingCart {
 	}
 
 
+	public double getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(double totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
 	@Override
 	public String toString() {
-		return "ShoppingCart [id=" + id + "]";
+		return "ShoppingCart [id=" + id + ", totalAmount=" + totalAmount + ", items=" + items + "]";
 	}
 
 	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)

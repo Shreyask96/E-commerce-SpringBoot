@@ -131,7 +131,7 @@ public class CustomerService {
 
 	}
 	
-	public String addToCart(Customer customer, int id, ModelMap map) {
+	public String addToCart(Customer customer, int id, ModelMap map, HttpSession session) {
 		Product product = productDao.findById(id);
 
 		ShoppingCart cart = customer.getCart();
@@ -165,15 +165,81 @@ public class CustomerService {
 			cart.setItems(items);
 			customer.setCart(cart);
 			customerDao.save(customer);
+			
+			session.setAttribute("customer", customer);
 			//updating stock
 			product.setStock(product.getStock()-1);
 			productDao.save(product);
+			
+		
 			
 			map.put("pass", "Product Added to Cart");
 			return fetchProducts(map);
 		} else {
 			map.put("fail", "Out of stock");
 			return fetchProducts(map);
+		}
+	}
+
+	public String viewCart(Customer customer, ModelMap map) {
+		ShoppingCart cart=customer.getCart();
+		
+		if(cart==null || cart.getItems().isEmpty())
+		{
+			map.put("fail", "No items in cart");
+			return "CustomerHome";
+		}
+		else {
+			map.put("items", cart.getItems());
+			return "ViewCart";
+		}
+	}
+	
+	public String removeFromCart(Customer customer, int id, ModelMap map, HttpSession session) {
+		Product product = productDao.findById(id);
+
+		ShoppingCart cart = customer.getCart();
+		if (cart == null) {
+			map.put("fail", "Item not in Cart");
+			return fetchProducts(map);
+		} 
+		else {
+			List<Item> items = cart.getItems();
+			if (items == null || items.isEmpty()) {
+				map.put("fail", "Item not in Cart");
+				return fetchProducts(map);
+			} else {
+				Item item = null;
+				for (Item item2 : items) {
+					if (item2.getName().equals(product.getName())) {
+						item = item2;
+						break;
+					}
+				}
+				if (item == null) {
+					map.put("fail", "Item not in Cart");
+					return fetchProducts(map);
+				} 
+				else {
+					if (item.getQuantity() > 1) {
+						item.setQuantity(item.getQuantity() - 1);
+						item.setPrice(item.getPrice() - product.getPrice());
+					}
+					else {
+						items.remove(item);
+					}
+				}
+				cart.setItems(items);
+				cart.setTotalAmount(cart.getItems().stream().mapToDouble(x -> x.getPrice()).sum());
+				customer.setCart(cart);
+				customerDao.save(customer);
+				// updating stock
+				product.setStock(product.getStock() + 1);
+				productDao.save(product);
+				session.setAttribute("customer", customer);
+				map.put("pass", "Product Removed from Cart");
+				return fetchProducts(map);
+			}
 		}
 	}
 }

@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="ISO-8859-1">
-	<title>Product Table</title>
+	<title>Customer Cart</title>
 
 	<style>
 		body {
@@ -17,12 +17,12 @@
 		h1 {
 			color: #333;
 		}
-		
-		h2{
+
+		h2 {
 			color: green;
 		}
-		
-		h3{
+
+		h3 {
 			color: red;
 		}
 
@@ -36,16 +36,16 @@
 		td {
 			border: 1px solid #ddd;
 			padding: 8px;
-			text-align: center;
+			text-align: left;
 		}
 
 		th {
 			background-color: #f2f2f2;
 		}
-		
-		a{
+
+		a {
 			text-decoration: none;
-			font-size: 35px;
+			font-size: 40px;
 		}
 
 		img {
@@ -75,7 +75,7 @@
 			background-color: #555;
 		}
 	</style>
-	
+
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			setTimeout(function () {
@@ -91,27 +91,27 @@
 <body>
 	<h2 th:text="${pass}"></h2>
 	<h3 th:text="${fail}"></h3>
-	<h1>Product List</h1>
+	<h1>Cart Items</h1>
 	<table>
 		<tr>
 			<th>Name</th>
 			<th>Picture</th>
 			<th>Category</th>
 			<th>Price</th>
-			<th>Stock</th>
-			<th>Remove</th>
 			<th>Quantity</th>
-			<th>Add</th>
+			<th>Amount</th>
 		</tr>
-		<tr th:each="product:${products}">
-			<td th:text="${product.name}"></td>
-			<td><img th:src="@{'data:image/jpeg;base64,'+${product.generateBase64Image()}}"></td>
-			<td th:text="${product.category}"></td>
-			<td th:text="${product.price}"></td>
-			<td th:text="${product.stock}"></td>
-			<td><a href="">-</a></td>
-			<td>0</td>
-			<td><a th:href="@{'/customer/cart-add/'+${product.id}}">+</a></td>
+		<tr th:each="item:${cart.items}">
+			<td th:text="${item.name}"></td>
+			<td><img th:src="@{'data:image/jpeg;base64,'+${item.generateBase64Image()}}"></td>
+			<td th:text="${item.category}"></td>
+			<td th:text="${item.price/item.quantity}"></td>
+			<td th:text="${item.quantity}"></td>
+			<td th:text="'&#8377'+${item.price}+'&#8377'"></td>
+		</tr>
+		<tr>
+			<td colspan="5">Total Amount:</td>
+			<td th:text="'&#8377'+${cart.totalAmount}"></td>
 		</tr>
 	</table>
 
